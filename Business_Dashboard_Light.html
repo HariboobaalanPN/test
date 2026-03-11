@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>Business Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#F0F4FA;color:#1A2540;font-family:'Segoe UI',system-ui,sans-serif;display:flex;flex-direction:column;min-height:100vh;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:#F0F4FA;}
+::-webkit-scrollbar-thumb{background:#C5D0E0;border-radius:3px;}
+select,input{background:#FFFFFF;border:1px solid #D4DCEB;color:#1A2540;border-radius:4px;padding:3px 8px;font-size:10px;outline:none;cursor:pointer;font-family:inherit;}
+select option{background:#FFFFFF;}
+button{font-family:inherit;cursor:pointer;}
+.card{background:#FFFFFF;border:1px solid #E2E9F3;border-radius:8px;padding:16px;box-shadow:0 1px 4px rgba(26,37,64,0.06);}
+.st{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+.st-bar{width:3px;height:16px;border-radius:2px;}
+.st-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#6B7FA3;font-family:monospace;}
+.nav-item{padding:9px 10px;border-radius:6px;margin-bottom:2px;cursor:pointer;transition:all 0.15s;border-left:3px solid transparent;border:1px solid transparent;border-left:3px solid transparent;}
+.nav-item:hover{background:rgba(0,100,200,0.06);}
+.nav-active{background:rgba(0,100,200,0.1)!important;border-color:rgba(0,100,200,0.25)!important;border-left-color:#0064C8!important;}
+.rag-g{background:#00C47722;color:#008A55;border:1px solid #00C47755;border-radius:3px;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:monospace;}
+.rag-a{background:#E8950022;color:#A86500;border:1px solid #E8950055;border-radius:3px;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:monospace;}
+.rag-r{background:#E8273322;color:#C01020;border:1px solid #E8273355;border-radius:3px;padding:2px 7px;font-size:10px;font-weight:700;letter-spacing:1px;font-family:monospace;}
+.kpi{background:#FFFFFF;border:1px solid #E2E9F3;border-radius:8px;padding:14px 16px;flex:1;min-width:120px;position:relative;overflow:hidden;box-shadow:0 1px 4px rgba(26,37,64,0.06);}
+.page{display:none;} .page.active{display:grid;grid-template-columns:repeat(12,1fr);gap:14px;}
+table{width:100%;border-collapse:collapse;font-size:11px;}
+th{color:#6B7FA3;padding:7px 9px;text-align:left;font-weight:600;white-space:nowrap;border-bottom:1px solid #D4DCEB;background:#F7F9FC;}
+td{padding:8px 9px;border-bottom:1px solid rgba(212,220,235,0.6);}
+tr:hover td{background:rgba(0,100,200,0.04);}
+canvas{display:block;}
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.pill{padding:3px 8px;border-radius:4px;font-size:10px;cursor:pointer;border:1px solid #D4DCEB;color:#6B7FA3;}
+.pill.active{background:rgba(0,100,200,0.12);border-color:#0064C8;color:#0064C8;font-weight:700;}
+.tag{background:#EEF2F9;color:#6B7FA3;border-radius:3px;padding:1px 4px;font-size:9px;}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div style="background:#FFFFFF;border-bottom:1px solid #E2E9F3;padding:0 20px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0;box-shadow:0 1px 6px rgba(26,37,64,0.08);">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div style="width:26px;height:26px;background:#0064C8;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;">◈</div>
+    <div>
+      <div style="font-size:12px;font-weight:800;letter-spacing:0.5px;color:#1A2540;">Business Dashboard</div>
+      <div style="font-size:9px;color:#6B7FA3;letter-spacing:1px;">BOOK OF BUSINESS · MANAGEMENT REVIEW</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;">
+    <span style="font-size:9px;color:#6B7FA3;">BU</span><select id="fBU"><option>All</option><option>Data</option><option>IP</option><option>QA</option><option>SE</option><option>Security</option><option>SN</option></select>
+    <span style="font-size:9px;color:#6B7FA3;">YEAR</span><select id="fYr"><option>2022</option><option>2023</option><option selected>2024</option><option>2025</option></select>
+    <span style="font-size:9px;color:#6B7FA3;">QUARTER</span><select id="fQ"><option>All</option><option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option></select>
+    <span style="font-size:9px;color:#6B7FA3;">MONTH</span><select id="fMo"><option>All</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select>
+    <div id="nowDate" style="font-size:10px;color:#6B7FA3;padding:3px 10px;background:#F0F4FA;border-radius:4px;border:1px solid #D4DCEB;"></div>
+    <div style="width:7px;height:7px;border-radius:50%;background:#00A86B;box-shadow:0 0 5px #00C47788;"></div>
+    <span style="font-size:9px;color:#008A55;">LIVE</span>
+  </div>
+</div>
+
+<div style="display:flex;flex:1;">
+<!-- SIDEBAR -->
+<div style="width:188px;background:#FFFFFF;border-right:1px solid #E2E9F3;padding:16px 0;display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:50px;height:calc(100vh - 50px);overflow-y:auto;box-shadow:1px 0 6px rgba(26,37,64,0.05);">
+  <div style="padding:0 13px 13px;border-bottom:1px solid #E2E9F3;">
+    <div style="font-size:8px;color:#6B7FA3;letter-spacing:2px;margin-bottom:10px;">NAVIGATION</div>
+    <div class="nav-item nav-active" onclick="showPage('overview',this)" style="border-left-color:#0064C8;">
+      <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:13px;color:#0064C8;">◈</span><div><div style="font-size:11px;font-weight:700;color:#1A2540;">Overview</div><div style="font-size:8px;color:#6B7FA3;">Executive Summary</div></div></div>
+    </div>
+    <div class="nav-item" onclick="showPage('bu',this)">
+      <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:13px;color:#C5D0E0;">⬡</span><div><div style="font-size:11px;font-weight:500;color:#6B7FA3;">BU Performance</div><div style="font-size:8px;color:#6B7FA3;">Business Units</div></div></div>
+    </div>
+    <div class="nav-item" onclick="showPage('delivery',this)">
+      <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:13px;color:#C5D0E0;">◎</span><div><div style="font-size:11px;font-weight:500;color:#6B7FA3;">Project Delivery</div><div style="font-size:8px;color:#6B7FA3;">Health & Risk</div></div></div>
+    </div>
+    <div class="nav-item" onclick="showPage('team',this)">
+      <div style="display:flex;align-items:center;gap:7px;"><span style="font-size:13px;color:#C5D0E0;">⬡</span><div><div style="font-size:11px;font-weight:500;color:#6B7FA3;">Coworker Insights</div><div style="font-size:8px;color:#6B7FA3;">Individual Profile</div></div></div>
+    </div>
+  </div>
+  <div id="buSelector" style="display:none;padding:13px 13px 0;">
+    <!-- <div style="font-size:8px;color:${C.mut};letter-spacing:2px;margin-bottom:8px;">SELECT BU</div> -->
+    <div id="buList"></div>
+  </div>
+  <div style="margin-top:auto;padding:13px;">
+    <div style="font-size:8px;color:#6B7FA3;letter-spacing:1.5px;margin-bottom:7px;">DRILL PATH</div>
+    <div id="drillPath"></div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div style="flex:1;padding:20px;overflow-y:auto;overflow-x:hidden;">
+  <div style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #E2E9F3;display:flex;justify-content:space-between;align-items:flex-end;">
+    <div>
+      <div id="pageTitle" style="font-size:18px;font-weight:800;color:#1A2540;">Executive Overview</div>
+      <div id="pageSub" style="font-size:10px;color:#6B7FA3;margin-top:3px;">Business performance summary · Q4 FY2024</div>
+    </div>
+    <div style="display:flex;gap:7px;">
+      <!-- <button style="background:#FFFFFF;border:1px solid #E2E9F3;color:${C.mut};border-radius:5px;padding:5px 12px;font-size:10px;">PDF</button>
+      <button style="background:#FFFFFF;border:1px solid #E2E9F3;color:${C.mut};border-radius:5px;padding:5px 12px;font-size:10px;">Share</button>
+      <button style="background:#FFFFFF;border:1px solid #E2E9F3;color:${C.mut};border-radius:5px;padding:5px 12px;font-size:10px;" onclick="drawAllCharts()">Refresh</button> -->
+    </div>
+  </div>
+
+  <!-- OVERVIEW PAGE -->
+  <div id="page-overview" class="page active">
+    <div style="grid-column:span 12;display:flex;gap:10px;flex-wrap:wrap;" id="kpi-overview"></div>
+    <div style="grid-column:span 12;display:flex;gap:10px;flex-wrap:wrap;" id="kpi-overview2"></div>
+    <div class="card" style="grid-column:span 8;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Revenue Trend by Quarter</span></div><canvas id="c-revTrend" height="185"></canvas></div>
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">Workforce Gender</span></div><canvas id="c-gender" height="185"></canvas></div>
+    <div class="card" style="grid-column:span 5;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Top Clients by Revenue</span></div><div id="clientBars"></div></div>
+    <div class="card" style="grid-column:span 7;"><div class="st"><div class="st-bar" style="background:#00A86B;"></div><span class="st-label">Utilization Trend (12M)</span></div><canvas id="c-util" height="155"></canvas></div>
+    <div class="card" style="grid-column:span 7;"><div class="st"><div class="st-bar" style="background:#E89500;"></div><span class="st-label">Hiring / Attrition / Benching</span></div><canvas id="c-hiring" height="155"></canvas></div>
+    <div class="card" style="grid-column:span 5;"><div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">BU Performance Snapshot</span></div><div id="buSnapshot"></div></div>
+  </div>
+
+  <!-- BU PAGE -->
+  <div id="page-bu" class="page">
+    <div class="card" id="buHeader" style="grid-column:span 12;padding:12px 16px;"></div>
+    <div class="card" style="grid-column:span 5;"><div class="st"><div class="st-bar" style="background:#00A86B;"></div><span class="st-label">Revenue by Quarter</span></div><canvas id="c-buRev" height="175"></canvas></div>
+    <div class="card" style="grid-column:span 3;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Budget Monitoring</span></div><div id="budgetMon"></div></div>
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">Hybrid Compliance</span></div><canvas id="c-compliance" height="175"></canvas></div>
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Role-wise Distribution</span></div><div style="font-size:9px;color:#6B7FA3;margin-bottom:6px;">Headcount by seniority — pyramid view</div><div id="pyramid"></div></div>
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Skill Distribution</span></div><canvas id="c-skills" height="185"></canvas></div>
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#00A86B;"></div><span class="st-label">Resource Availability</span></div><div id="resAvail"></div></div>
+    <div class="card" style="grid-column:span 3;"><div class="st"><div class="st-bar" style="background:#E89500;"></div><span class="st-label">Workforce Mix</span></div><canvas id="c-onshore" height="90"></canvas><div id="attrKpi" style="display:flex;justify-content:space-between;margin-top:10px;"></div></div>
+    <div class="card" style="grid-column:span 3;"><div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">POD Structure</span></div><div id="podList"></div></div>
+    <div class="card" style="grid-column:span 6;"><div class="st"><div class="st-bar" style="background:#D4306A;"></div><span class="st-label">Org-Level Activity Participation</span></div><div id="orgActs"></div></div>
+    <div class="card" style="grid-column:span 6;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Project Performance</span></div><div id="projPerf"></div></div>
+    <div class="card" style="grid-column:span 6;"><div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">Mentor–Mentee Hierarchy</span><span style="font-size:9px;color:${C.mut};font-weight:400;margin-left:4px;">— click mentor to expand/collapse</span></div><div id="decompTree"></div></div>
+  </div>
+
+  <!-- DELIVERY PAGE -->
+  <div id="page-delivery" class="page">
+    <div style="grid-column:span 12;display:flex;gap:10px;flex-wrap:wrap;" id="kpi-delivery"></div>
+    <div class="card" style="grid-column:span 12;padding:10px 14px;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:9px;color:#6B7FA3;letter-spacing:1.5px;font-family:monospace;">PAGE FILTERS</span>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">CLIENT</span><select id="dClient"><option>All</option><option>Accenture</option><option>Deloitte</option><option>JPMorgan</option><option>Microsoft</option><option>Goldman Sachs</option><option>Wells Fargo</option></select></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">REV TIER</span><select id="dRevTier"><option>All</option><option>R1 (&gt;$2M)</option><option>R2 ($1–2M)</option><option>R3 (&lt;$1M)</option></select></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">PROJECT STATUS</span><select id="dProjStatus"><option>All</option><option>Active</option><option>At Risk</option><option>On Hold</option><option>Completed</option></select></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">RAG STATUS</span><select id="dRAG"><option>All</option><option>Green</option><option>Amber</option><option>Red</option></select></div>
+        <!-- <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:${C.mut};">BU</span><select id="dBU"><option>All</option><option>Data</option><option>IP</option><option>QA</option><option>SE</option><option>Security</option><option>SN</option></select></div> -->
+      </div>
+    </div>
+    <div class="card" style="grid-column:span 12;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Active Project Portfolio</span></div><div style="overflow-x:auto;"><table id="projTable"></table></div></div>
+    <div class="card" style="grid-column:span 7;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Planned vs Actual Billed Hours</span></div><canvas id="c-billing" height="185"></canvas></div>
+    <div class="card" style="grid-column:span 2;"><div class="st"><div class="st-bar" style="background:#E89500;"></div><span class="st-label">Rev Tier</span></div><div id="tierCards"></div></div>
+    <div class="card" style="grid-column:span 3;"><div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">Sprint Velocity</span></div><canvas id="c-sprint" height="185"></canvas></div>
+    <div class="card" style="grid-column:span 6;"><div class="st"><div class="st-bar" style="background:#D42030;"></div><span class="st-label">Escalations</span></div><div id="escalations"></div></div>
+    <div class="card" style="grid-column:span 6;"><div class="st"><div class="st-bar" style="background:#D42030;"></div><span class="st-label">Spillover Analysis</span></div><canvas id="c-spill" height="165"></canvas></div>
+  </div>
+
+  <!-- TEAM PAGE -->
+  <div id="page-team" class="page">
+    <div style="grid-column:span 12;display:flex;gap:10px;flex-wrap:wrap;" id="kpi-team"></div>
+    <div class="card" style="grid-column:span 12;padding:10px 14px;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <span style="font-size:9px;color:#6B7FA3;letter-spacing:1.5px;font-family:monospace;">PAGE FILTERS</span>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">MANAGER</span><select id="tMgr" onchange="renderTeam()"><option>All</option><option>R. Patel</option><option>P. Nair</option><option>M. Torres</option><option>J. Wu</option><option>S. Chen</option><option>A. Gomez</option></select></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">YEAR</span><select id="tYr"><option>2022</option><option>2023</option><option selected>2024</option><option>2025</option></select></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">QUARTER</span><div id="tQPills" style="display:flex;gap:3px;"></div></div>
+        <div style="display:flex;align-items:center;gap:5px;"><span style="font-size:9px;color:#6B7FA3;">MONTH</span><select id="tMo"><option>All</option><option>Jan</option><option>Feb</option><option>Mar</option><option>Apr</option><option>May</option><option>Jun</option><option>Jul</option><option>Aug</option><option>Sep</option><option>Oct</option><option>Nov</option><option>Dec</option></select></div>
+        <div style="margin-left:auto;"><input id="tSearch" type="text" placeholder="Search name, role, BU..." style="width:200px;padding:5px 12px;font-size:11px;" oninput="renderTeam()"></div>
+      </div>
+    </div>
+    <div class="card" style="grid-column:span 12;"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div class="st" style="margin-bottom:0;"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Coworker Details</span></div><span id="teamCount" style="font-size:10px;color:#6B7FA3;"></span></div><div style="overflow-x:auto;"><table id="teamTable"></table></div></div>
+
+    <!-- Row: Accolades + Project Allocations -->
+    <div class="card" style="grid-column:span 6;">
+      <div class="st"><div class="st-bar" style="background:#D4306A;"></div><span class="st-label">Accolades</span></div>
+      <div id="accoladesVisual"></div>
+    </div>
+    <div class="card" style="grid-column:span 6;">
+      <div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Project Allocations</span></div>
+      <div id="projectAllocations"></div>
+    </div>
+
+    <!-- Row: Project Forecast + Org Activities -->
+    <div class="card" style="grid-column:span 6;">
+      <div class="st"><div class="st-bar" style="background:#6B3FD4;"></div><span class="st-label">Project Forecast Allocation</span></div>
+      <div id="projectForecast"></div>
+    </div>
+    <div class="card" style="grid-column:span 6;">
+      <div class="st"><div class="st-bar" style="background:#E89500;"></div><span class="st-label">Organizational Activities</span></div>
+      <div id="orgActivitiesCoworker"></div>
+    </div>
+
+    <!-- Row: Assets + Certification -->
+    <!-- <div class="card" style="grid-column:span 8;"><div class="st"><div class="st-bar" style="background:#0064C8;"></div><span class="st-label">Assets Developed by Coworker</span></div><div id="assetBars"></div></div> -->
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#00A86B;"></div><span class="st-label">Assets Developed By Coworker</span></div><div id="assetBars"></div></div>
+    <div class="card" style="grid-column:span 4;"><div class="st"><div class="st-bar" style="background:#00A86B;"></div><span class="st-label">Certification Status</span></div><div id="certList"></div></div>
+  </div>
+</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const C={bg:"#F0F4FA",sur:"#F7F9FC",card:"#FFFFFF",bdr:"#E2E9F3",acc:"#0064C8",grn:"#008A55",amb:"#A86500",red:"#C01020",pur:"#6B3FD4",txt:"#1A2540",mut:"#6B7FA3",dim:"#C5D0E0"};
+const buList2=[{bu:"Data & Analytics",res:87,util:91,mgr:"Sarah Chen",rev:18.4,color:C.acc},{bu:"IP & Products",res:64,util:88,mgr:"Raj Patel",rev:14.2,color:C.pur},{bu:"QA & Testing",res:52,util:79,mgr:"Mike Torres",rev:9.8,color:C.grn},{bu:"Software Eng.",res:118,util:85,mgr:"Priya Nair",rev:22.1,color:C.amb},{bu:"Security",res:41,util:93,mgr:"James Wu",rev:11.3,color:C.red},{bu:"ServiceNow",res:38,util:87,mgr:"Ana Gomez",rev:8.6,color:"#FF6B9D"}];
+const revTrend=[{q:"Q1'23",r:4.2,t:4.0},{q:"Q2'23",r:4.8,t:4.5},{q:"Q3'23",r:5.1,t:5.0},{q:"Q4'23",r:6.3,t:5.5},{q:"Q1'24",r:5.9,t:6.0},{q:"Q2'24",r:7.2,t:6.5},{q:"Q3'24",r:7.8,t:7.0},{q:"Q4'24",r:8.4,t:7.5}];
+const clients=[{n:"Accenture",r:12.4,p:18},{n:"Deloitte",r:9.8,p:14},{n:"JPMorgan",r:8.1,p:12},{n:"Microsoft",r:7.3,p:11},{n:"Goldman Sachs",r:6.2,p:9},{n:"Wells Fargo",r:5.1,p:7}];
+const utilData=[76,78,82,79,84,87,85,83,88,91,89,86];
+const months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const hiring=[{h:12,a:3,b:5},{h:8,a:2,b:4},{h:15,a:4,b:3},{h:10,a:5,b:6},{h:18,a:3,b:2},{h:14,a:6,b:4},{h:20,a:4,b:3},{h:11,a:2,b:5}];
+const buRevQ=[{q:"Q1",c:3.8,p:3.2,t:3.5},{q:"Q2",c:4.4,p:3.9,t:4.0},{q:"Q3",c:4.9,p:4.3,t:4.5},{q:"Q4",c:5.3,p:4.8,t:5.0}];
+const roles=[{r:"Associate Consultant",n:52,p:30},{r:"Consultant",n:41,p:24},{r:"Senior Consultant",n:35,p:20},{r:"Lead Consultant",n:28,p:16},{r:"Architect",n:17,p:10}];
+const orgActs=[{a:"CNG",d:34,i:12},{a:"AllSpark",d:28,i:9},{a:"AI Univ.",d:51,i:18},{a:"Datahive",d:42,i:14},{a:"Hackathons",d:19,i:22},{a:"Int. Events",d:63,i:8}];
+const skillsD=[{s:"React/Node",n:42},{s:"Python/ML",n:38},{s:"AWS",n:31},{s:"Java",n:28},{s:"K8s",n:22},{s:"SN",n:19},{s:"Tableau",n:17}];
+const pods=[{p:"Databricks",r:12,pr:3},{p:"Snowflake",r:9,pr:2},{p:"Fabric",r:14,pr:4},{p:"DataRobot",r:11,pr:3},{p:"Azure",r:8,pr:2}];
+const projTbl=[{n:"DataPlatform v3",rag:"G",bi:1840,bd:1780,m:"34%"},{n:"SecureNet Ops",rag:"G",bi:960,bd:920,m:"41%"},{n:"CloudMigrate Pro",rag:"A",bi:1200,bd:1050,m:"28%"},{n:"QA Automation Hub",rag:"A",bi:720,bd:680,m:"22%"},{n:"ServiceNow ITSM",rag:"R",bi:880,bd:610,m:"11%"}];
+const mentors=[{n:"Sarah Chen",r:"Lead Architect",mt:[{n:"Kevin Park",r:"ML Engineer"},{n:"Priya Nair",r:"Data Engineer"},{n:"Leo Zhang",r:"Jr. Engineer"}]},{n:"James Wu",r:"Security Analyst",mt:[{n:"Tom Anderson",r:"ServiceNow Dev"},{n:"Mei Lin",r:"Jr. Analyst"}]},{n:"Ana Gomez",r:"Project Manager",mt:[{n:"Raj Patel",r:"Sr. Engineer"},{n:"Maya Rodriguez",r:"QA Lead"},{n:"Chris Hall",r:"Trainee"}]}];
+const projList=[{n:"DataPlatform v3",cl:"Accenture",ty:"Development",pm:"R. Sharma",co:"T&M",st:"Active",rag:"G",mtd:91,ytd:88,tier:"R1"},{n:"SecureNet Ops",cl:"JPMorgan",ty:"Managed Svc",pm:"L. Park",co:"Fixed",st:"Active",rag:"G",mtd:89,ytd:86,tier:"R1"},{n:"CloudMigrate Pro",cl:"Deloitte",ty:"Migration",pm:"A. Kumar",co:"T&M",st:"Active",rag:"A",mtd:76,ytd:79,tier:"R2"},{n:"QA Auto Hub",cl:"Microsoft",ty:"Testing",pm:"S. Johnson",co:"Fixed",st:"Active",rag:"A",mtd:74,ytd:77,tier:"R2"},{n:"ServiceNow ITSM",cl:"Goldman",ty:"ITSM",pm:"P. Wilson",co:"Fixed",st:"At Risk",rag:"R",mtd:58,ytd:63,tier:"R3"},{n:"ML Analytics",cl:"Wells Fargo",ty:"AI/ML",pm:"N. Gupta",co:"T&M",st:"Active",rag:"G",mtd:93,ytd:91,tier:"R1"}];
+const billing=[{m:"Jan",p:2400,a:2180},{m:"Feb",p:2200,a:2240},{m:"Mar",p:2600,a:2510},{m:"Apr",p:2800,a:2650},{m:"May",p:2500,a:2480},{m:"Jun",p:3000,a:2890},{m:"Jul",p:2900,a:2940},{m:"Aug",p:3200,a:3010}];
+const sprints=[{s:"S1",p:84,d:78,sp:6},{s:"S2",p:92,d:88,sp:4},{s:"S3",p:76,d:74,sp:2},{s:"S4",p:98,d:81,sp:17},{s:"S5",p:88,d:86,sp:2},{s:"S6",p:94,d:91,sp:3}];
+const escs=[{p:"ServiceNow ITSM",cl:"Goldman",dt:"Nov 12",ty:"Delivery Delay",st:"Open"},{p:"CloudMigrate Pro",cl:"Deloitte",dt:"Oct 28",ty:"Scope Creep",st:"Resolved"},{p:"QA Auto Hub",cl:"Microsoft",dt:"Nov 18",ty:"Resource Gap",st:"In Progress"}];
+const teamD=[{n:"Sarah Chen",r:"Lead Architect",ty:"FTE",e:"9y",b:1680,av:"20%",sk:["AWS","Python"],bu:"Data",mg:"R. Patel",me:"J. Smith",al:"Full",hy:"92%"},{n:"Raj Patel",r:"Sr. Engineer",ty:"FTE",e:"7y",b:1520,av:"10%",sk:["React","Node"],bu:"SE",mg:"P. Nair",me:"M. Torres",al:"Full",hy:"88%"},{n:"Maya Rodriguez",r:"QA Lead",ty:"FTE",e:"5y",b:1400,av:"30%",sk:["Selenium","Java"],bu:"QA",mg:"M. Torres",me:"S. Chen",al:"Half",hy:"95%"},{n:"James Wu",r:"Security Analyst",ty:"FTE",e:"6y",b:1580,av:"5%",sk:["CISSP","SIEM"],bu:"Sec",mg:"J. Wu",me:"R. Patel",al:"Full",hy:"81%"},{n:"Priya Nair",r:"Data Engineer",ty:"Contractor",e:"4y",b:1360,av:"40%",sk:["Spark","Python"],bu:"Data",mg:"S. Chen",me:"—",al:"Half",hy:"76%"},{n:"Tom Anderson",r:"ServiceNow Dev",ty:"FTE",e:"3y",b:1240,av:"50%",sk:["SN","JS"],bu:"SN",mg:"A. Gomez",me:"J. Wu",al:"Half",hy:"84%"},{n:"Ana Gomez",r:"Project Manager",ty:"FTE",e:"8y",b:1600,av:"15%",sk:["PMP","Agile"],bu:"SE",mg:"P. Nair",me:"S. Chen",al:"Full",hy:"90%"},{n:"Kevin Park",r:"ML Engineer",ty:"FTE",e:"5y",b:1460,av:"20%",sk:["PyTorch","Python"],bu:"Data",mg:"S. Chen",me:"P. Nair",al:"Full",hy:"87%"}];
+const assets=[{n:"Sarah Chen",l:4,i:2,b:1},{n:"Raj Patel",l:2,i:3,b:0},{n:"Maya Rodriguez",l:3,i:1,b:2},{n:"James Wu",l:5,i:2,b:1},{n:"Priya Nair",l:1,i:4,b:0},{n:"Tom Anderson",l:2,i:1,b:1},{n:"Ana Gomez",l:3,i:3,b:0},{n:"Kevin Park",l:2,i:2,b:1}];
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let activePage='overview', activeBU='Data & Analytics', expandedMentors=[0,1,2], tQ='All';
+
+// ── CANVAS CHART HELPERS ──────────────────────────────────────────────────────
+function ctx(id){
+  const c=document.getElementById(id);
+  if(!c)return null;
+  c.width=c.parentElement.clientWidth-32;
+  return c.getContext('2d');
+}
+
+function drawBarChart(id,labels,datasets,opts={}){
+  const x=ctx(id); if(!x)return;
+  const W=x.canvas.width,H=x.canvas.height;
+  const pad={l:40,r:10,t:10,b:30};
+  const cw=W-pad.l-pad.r, ch=H-pad.t-pad.b;
+  x.clearRect(0,0,W,H);
+  const maxV=Math.max(...datasets.flatMap(d=>d.data))*1.1||10;
+  // grid
+  x.strokeStyle=C.dim; x.lineWidth=0.5;
+  for(let i=0;i<=4;i++){
+    const y=pad.t+ch-(ch/4*i);
+    x.beginPath();x.setLineDash([2,4]);x.moveTo(pad.l,y);x.lineTo(W-pad.r,y);x.stroke();
+    x.fillStyle=C.mut;x.font='9px monospace';x.textAlign='right';
+    x.fillText(Math.round(maxV/4*i)+(opts.pct?'%':''),pad.l-4,y+3);
+  }
+  x.setLineDash([]);
+  const grp=datasets.length, bw=Math.max(8,(cw/labels.length*0.7)/grp), gap=2;
+  labels.forEach((lbl,i)=>{
+    const cx2=pad.l+cw/labels.length*(i+0.5);
+    datasets.forEach((ds,di)=>{
+      const bx=cx2-(grp*bw+gap*(grp-1))/2+di*(bw+gap);
+      const bh=(ds.data[i]/maxV)*ch;
+      x.fillStyle=ds.color;
+      x.beginPath();x.roundRect(bx,pad.t+ch-bh,bw,bh,2);x.fill();
+    });
+    x.fillStyle=C.mut;x.font='9px sans-serif';x.textAlign='center';
+    x.fillText(lbl,cx2,H-5);
+  });
+}
+
+function drawLineArea(id,labels,datasets,opts={}){
+  const x=ctx(id); if(!x)return;
+  const W=x.canvas.width,H=x.canvas.height;
+  const pad={l:42,r:10,t:10,b:30};
+  const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+  x.clearRect(0,0,W,H);
+  const allV=datasets.flatMap(d=>d.data).filter(v=>v!=null);
+  const minV=opts.min||Math.min(...allV)*0.95;
+  const maxV=opts.max||Math.max(...allV)*1.05;
+  const range=maxV-minV||1;
+  const toY=v=>pad.t+ch-(((v-minV)/range)*ch);
+  const toX=i=>pad.l+cw/(labels.length-1)*i;
+  // grid
+  for(let i=0;i<=4;i++){
+    const v=minV+range/4*i;
+    const y=toY(v);
+    x.strokeStyle=C.dim;x.lineWidth=0.5;x.setLineDash([2,4]);
+    x.beginPath();x.moveTo(pad.l,y);x.lineTo(W-pad.r,y);x.stroke();
+    x.fillStyle=C.mut;x.font='9px monospace';x.textAlign='right';
+    x.fillText((opts.pct?v.toFixed(0)+'%':'$'+v.toFixed(1)+'M'),pad.l-4,y+3);
+  }
+  // ref line
+  if(opts.refLine){
+    const ry=toY(opts.refLine);
+    x.strokeStyle=C.amb;x.lineWidth=1;x.setLineDash([4,2]);
+    x.beginPath();x.moveTo(pad.l,ry);x.lineTo(W-pad.r,ry);x.stroke();
+    x.fillStyle=C.amb;x.font='9px sans-serif';x.textAlign='left';
+    x.fillText('Target',pad.l+4,ry-3);
+  }
+  x.setLineDash([]);
+  datasets.forEach(ds=>{
+    const pts=ds.data.map((v,i)=>v!=null?{x:toX(i),y:toY(v)}:null).filter(Boolean);
+    if(!pts.length)return;
+    if(ds.fill){
+      x.beginPath();x.moveTo(pts[0].x,pad.t+ch);
+      pts.forEach(p=>x.lineTo(p.x,p.y));
+      x.lineTo(pts[pts.length-1].x,pad.t+ch);x.closePath();
+      x.fillStyle=ds.color+'22';x.fill();
+    }
+    x.beginPath();x.moveTo(pts[0].x,pts[0].y);
+    pts.forEach(p=>x.lineTo(p.x,p.y));
+    x.strokeStyle=ds.color;x.lineWidth=2;
+    if(ds.dash)x.setLineDash([5,3]); else x.setLineDash([]);
+    x.stroke();x.setLineDash([]);
+  });
+  labels.forEach((lbl,i)=>{
+    x.fillStyle=C.mut;x.font='9px sans-serif';x.textAlign='center';
+    x.fillText(lbl,toX(i),H-5);
+  });
+}
+
+function drawDonut(id,data,colors){
+  const x=ctx(id); if(!x)return;
+  const W=x.canvas.width,H=x.canvas.height;
+  x.clearRect(0,0,W,H);
+  const total=data.reduce((s,d)=>s+d.v,0);
+  const cx2=W/2,cy=H*0.45,r=Math.min(W,H)*0.33,ir=r*0.55;
+  let ang=-Math.PI/2;
+  data.forEach((d,i)=>{
+    const sl=(d.v/total)*Math.PI*2;
+    x.beginPath();x.moveTo(cx2,cy);x.arc(cx2,cy,r,ang,ang+sl);x.closePath();
+    x.fillStyle=colors[i];x.fill();
+    ang+=sl;
+  });
+  x.beginPath();x.arc(cx2,cy,ir,0,Math.PI*2);x.fillStyle='#FFFFFF';x.fill();
+  // legend
+  const lx=10,ly=H-14;
+  data.forEach((d,i)=>{
+    const ox=i*(W/data.length);
+    x.fillStyle=colors[i];x.fillRect(lx+ox,ly,8,8);
+    x.fillStyle=C.mut;x.font='9px sans-serif';x.textAlign='left';
+    x.fillText(d.n,lx+ox+11,ly+8);
+  });
+}
+
+// ── KPI CARDS ─────────────────────────────────────────────────────────────────
+function makeKPI(label,value,sub,color,trend){
+  return `<div class="kpi"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:${color};"></div>
+    <div style="font-size:10px;color:${C.mut};letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px;font-family:monospace;">${label}</div>
+    <div style="font-size:22px;font-weight:800;color:${C.txt};font-family:monospace;">${value}</div>
+    ${sub?`<div style="font-size:10px;color:${color};margin-top:3px;">${sub}</div>`:''}
+    ${trend?`<div style="font-size:10px;color:${trend>0?C.grn:C.red};margin-top:2px;">${trend>0?'▲':'▼'} ${Math.abs(trend)}% vs prior</div>`:''}
+  </div>`;
+}
+
+// ── PAGE NAVIGATION ───────────────────────────────────────────────────────────
+function showPage(id, el){
+  activePage=id;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('nav-active'));
+  el.classList.add('nav-active');
+  // document.getElementById('buSelector').style.display=id==='bu'?'block':'none';
+  const titles={overview:["Executive Overview","Business performance summary · Q4 FY2024"],bu:[activeBU,"Business Unit deep dive · Operational metrics"],delivery:["Project Delivery Health","Portfolio health · Delivery risk monitoring"],team:["Coworker Insights","Individual coworker profile · Allocation · Accolades · Activities"]};
+  document.getElementById('pageTitle').textContent=titles[id][0];
+  document.getElementById('pageSub').textContent=titles[id][1];
+  updateDrillPath();
+  setTimeout(drawAllCharts,50);
+}
+
+function updateDrillPath(){
+  const items=["Overview","BU Performance","Project Delivery","Coworker Insights"];
+  const keys=["overview","bu","delivery","team"];
+  const idx=keys.indexOf(activePage);
+  document.getElementById('drillPath').innerHTML=items.map((l,i)=>`
+    <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px;">
+      <div style="width:5px;height:5px;border-radius:50%;background:${i<=idx?C.acc:C.dim};flex-shrink:0;"></div>
+      <span style="font-size:9px;color:${i<=idx?C.acc:C.mut};">${l}</span>
+    </div>`).join('');
+}
+
+// ── RENDER STATIC HTML COMPONENTS ────────────────────────────────────────────
+function renderAll(){
+  document.getElementById('nowDate').textContent=new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
+
+  // BU nav list
+  document.getElementById('buList').innerHTML=buList2.map(b=>`
+    <div onclick="selectBU('${b.bu}')" id="bu-${b.bu.replace(/ /g,'_')}" style="padding:7px 10px;border-radius:5px;margin-bottom:2px;cursor:pointer;font-size:10px;color:${activeBU===b.bu?C.txt:C.mut};font-weight:${activeBU===b.bu?600:400};background:${activeBU===b.bu?C.pur+'20':'transparent'};border:1px solid ${activeBU===b.bu?C.pur+'44':'transparent'};">${b.bu}</div>`).join('');
+
+  // Overview KPIs
+  document.getElementById('kpi-overview').innerHTML=[
+    makeKPI('Active Projects','25','↑ 3 from last quarter',C.acc,12),
+    makeKPI('Total Clients','38','6 new this year',C.pur,8),
+    makeKPI('YTD Revenue','$48.4M','vs $42.1M target',C.grn,14.9),
+    makeKPI('Utilization %','86%','1,840 billed hrs/wk',C.amb),
+    makeKPI('Pipeline Revenue','$31.2M','Weighted forecast','#FF6B9D'),
+    makeKPI('Total Workforce','400','+24 YTD net hires',C.acc,6)
+  ].join('');
+  document.getElementById('kpi-overview2').innerHTML=[
+    makeKPI('Pipeline >80% Prob','$18.6M','8 opportunities',C.grn),
+    makeKPI('Pipeline <80% Prob','$12.6M','14 opportunities',C.amb)
+  ].join('');
+
+  // Client bars
+  document.getElementById('clientBars').innerHTML=clients.map((c,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:9px;">
+      <span style="font-size:10px;color:${C.mut};width:16px;text-align:right;font-family:monospace;">${i+1}</span>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px;">
+          <span style="font-size:11px;">${c.n}</span>
+          <span style="font-size:11px;color:${C.acc};font-family:monospace;">$${c.r}M</span>
+        </div>
+        <div style="height:4px;background:${C.dim};border-radius:2px;">
+          <div style="height:4px;width:${c.p*4}%;background:linear-gradient(90deg,${C.acc},${C.pur});border-radius:2px;"></div>
+        </div>
+      </div>
+      <span style="font-size:9px;color:${C.mut};width:28px;">${c.p}%</span>
+    </div>`).join('');
+
+  // BU Snapshot
+  document.getElementById('buSnapshot').innerHTML=buList2.map(b=>`
+    <div style="background:${C.sur};border:1px solid ${C.bdr};border-radius:6px;padding:7px 11px;margin-bottom:7px;border-left:3px solid ${b.color};">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:11px;font-weight:700;">${b.bu}</span><span style="font-size:10px;color:${b.color};font-family:monospace;">${b.util}%</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:2px;"><span style="font-size:9px;color:${C.mut};">${b.mgr}</span><span style="font-size:9px;color:${C.mut};">${b.res} res</span></div>
+    </div>`).join('');
+
+  renderBUPage();
+  renderDelivery();
+  renderTeam();
+  updateDrillPath();
+}
+
+function selectBU(bu){
+  activeBU=bu;
+  document.getElementById('pageTitle').textContent=bu;
+  document.querySelectorAll('[id^="bu-"]').forEach(el=>{ el.style.background='transparent';el.style.borderColor='transparent';el.style.color=C.mut;el.style.fontWeight=400; });
+  const el=document.getElementById('bu-'+bu.replace(/ /g,'_'));
+  if(el){el.style.background=C.pur+'20';el.style.borderColor=C.pur+'44';el.style.color=C.txt;el.style.fontWeight=600;}
+  renderBUPage();
+  setTimeout(drawAllCharts,50);
+}
+
+function renderBUPage(){
+  const bu=buList2.find(b=>b.bu===activeBU)||buList2[0];
+  document.getElementById('buHeader').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <div><div style="font-size:16px;font-weight:800;color:${bu.color};">${bu.bu}</div>
+        <div style="font-size:11px;color:${C.mut};margin-top:2px;">Manager: <span style="color:${C.txt};">${bu.mgr}</span> | HRBP: <span style="color:${C.txt};">Lisa Morgan</span></div></div>
+      <div style="display:flex;gap:18px;">
+        ${[{v:bu.res,l:'RESOURCES',c:C.acc},{v:bu.util+'%',l:'UTILIZATION',c:C.grn},{v:'$'+bu.rev+'M',l:'YTD REVENUE',c:C.amb},{v:'94%',l:'HYBRID COMPLY',c:C.pur}].map(x=>`<div style="text-align:center;"><div style="font-size:20px;font-weight:800;color:${x.c};font-family:monospace;">${x.v}</div><div style="font-size:9px;color:${C.mut};">${x.l}</div></div>`).join('')}
+      </div>
+    </div>`;
+
+  document.getElementById('budgetMon').innerHTML=`
+    ${[{l:'Total Budget',v:'$22.0M',c:C.txt},{l:'Used Budget',v:'$18.4M',c:C.acc},{l:'Remaining',v:'$3.6M',c:C.grn}].map(b=>`<div style="display:flex;justify-content:space-between;padding:7px 10px;background:${C.sur};border-radius:5px;margin-bottom:8px;"><span style="font-size:11px;color:${C.mut};">${b.l}</span><span style="font-size:13px;font-weight:700;color:${b.c};font-family:monospace;">${b.v}</span></div>`).join('')}
+    <div style="display:flex;justify-content:space-between;margin-bottom:5px;"><span style="font-size:10px;color:${C.mut};">Budget Burn</span><span style="font-size:10px;color:${C.amb};">83.6%</span></div>
+    <div style="height:7px;background:${C.dim};border-radius:4px;"><div style="height:7px;width:83.6%;background:linear-gradient(90deg,${C.acc},${C.amb});border-radius:4px;"></div></div>`;
+
+  // Pyramid — roles[0]=Associate Consultant (widest/base), roles[4]=Architect (narrowest/top)
+  const maxN=Math.max(...roles.map(r=>r.n));
+  const cols=["#80caff","#4eaff8","#2e8fe8","#1a6fc4","#0a4f8c"];
+  document.getElementById('pyramid').innerHTML=[...roles].reverse().map((r,i)=>{
+    const origIdx=roles.length-1-i;
+    const w=28+(r.n/maxN)*72;
+    return `<div style="display:flex;align-items:center;justify-content:center;position:relative;margin-bottom:4px;">
+      <div style="width:${w}%;height:30px;background:${cols[origIdx]};display:flex;align-items:center;justify-content:center;border-radius:2px;">
+        <span style="font-size:10px;font-weight:700;color:#fff;font-family:monospace;text-shadow:0 1px 2px rgba(0,0,0,0.7);">${r.r} — ${r.n}</span>
+      </div>
+      <span style="position:absolute;right:0;font-size:9px;color:${C.mut};font-family:monospace;">${r.p}%</span>
+    </div>`;}).join('');
+
+  // Resource Availability
+  const total=11+18+58;
+  document.getElementById('resAvail').innerHTML=`
+    ${[{n:'Fully Available',v:11,c:C.grn},{n:'Partially Avail.',v:18,c:C.amb},{n:'Fully Allocated',v:58,c:C.dim}].map(r=>{
+      const p=Math.round(r.v/total*100);
+      return `<div style="margin-bottom:9px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span style="font-size:10px;">${r.n}</span><span style="font-size:11px;font-weight:700;color:${r.c};font-family:monospace;">${r.v} <span style="font-size:9px;color:${C.mut};">(${p}%)</span></span></div>
+        <div style="height:9px;background:${C.dim};border-radius:5px;"><div style="height:9px;width:${p}%;background:${r.c};border-radius:5px;"></div></div>
+      </div>`;}).join('')}
+    <div style="margin-top:4px;padding:7px;background:${C.sur};border-radius:5px;display:flex;justify-content:space-around;">
+      <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:${C.grn};font-family:monospace;">11</div><div style="font-size:8px;color:${C.mut};">FULL-TIME</div></div>
+      <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:${C.amb};font-family:monospace;">18</div><div style="font-size:8px;color:${C.mut};">PART-TIME</div></div>
+      <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:${C.mut};font-family:monospace;">58</div><div style="font-size:8px;color:${C.mut};">ALLOCATED</div></div>
+    </div>`;
+
+  document.getElementById('attrKpi').innerHTML=`
+    <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:${C.red};font-family:monospace;">8</div><div style="font-size:9px;color:${C.mut};">RESIGN YTD</div></div>
+    <div style="text-align:center;"><div style="font-size:14px;font-weight:700;color:${C.amb};font-family:monospace;">9.2%</div><div style="font-size:9px;color:${C.mut};">ATTRITION</div></div>`;
+
+  document.getElementById('podList').innerHTML=pods.map(p=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 9px;background:${C.sur};border-radius:5px;margin-bottom:7px;">
+      <span style="font-size:11px;font-weight:600;">${p.p} POD </span>
+      <div><span style="font-size:10px;color:${C.acc};font-family:monospace;">${p.r}</span></div>
+    </div>`).join('');
+
+  document.getElementById('orgActs').innerHTML=`
+    <div style="font-size:9px;color:${C.mut};margin-bottom:8px;display:flex;gap:12px;">
+      <span style="display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:8px;height:8px;background:${C.grn};border-radius:1px;"></span>Completed</span>
+      <span style="display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:8px;height:8px;background:${C.amb};border-radius:1px;"></span>In Progress</span>
+    </div>
+    ${orgActs.map(a=>{const tot=a.d+a.i;const cp=Math.round(a.d/tot*100);const pp=100-cp;return `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="font-size:10px;width:80px;flex-shrink:0;">${a.a}</div>
+        <div style="flex:1;height:16px;background:${C.dim};border-radius:3px;overflow:hidden;display:flex;">
+          <div style="width:${cp}%;background:${C.grn};display:flex;align-items:center;justify-content:center;">${cp>12?`<span style="font-size:8px;color:#000;font-weight:700;">${a.d}</span>`:''}</div>
+          <div style="width:${pp}%;background:${C.amb}cc;display:flex;align-items:center;justify-content:center;">${pp>12?`<span style="font-size:8px;color:#000;font-weight:700;">${a.i}</span>`:''}</div>
+        </div>
+        <span style="font-size:9px;color:${C.mut};width:28px;text-align:right;font-family:monospace;">${tot}</span>
+      </div>`;}).join('')}`;
+
+  document.getElementById('projPerf').innerHTML=`
+    <table><thead><tr><th>Project</th><th>RAG</th><th>Billable</th><th>Billed</th><th>Margin</th></tr></thead>
+    <tbody>${projTbl.map(p=>`<tr><td style="color:${C.txt};">${p.n}</td><td><span class="rag-${p.rag.toLowerCase()}">${p.rag==='G'?'ON TRACK':p.rag==='A'?'AT RISK':'CRITICAL'}</span></td><td style="font-family:monospace;color:${C.mut};">${p.bi}</td><td style="font-family:monospace;color:${C.mut};">${p.bd}</td><td style="font-family:monospace;color:${C.acc};font-weight:700;">${p.m}</td></tr>`).join('')}</tbody></table>`;
+
+  renderDecompTree();
+}
+
+function renderDecompTree(){
+  const expanded=expandedMentors;
+  document.getElementById('decompTree').innerHTML=`
+    <div style="overflow-x:auto;"><div style="display:flex;align-items:flex-start;min-width:560px;padding-bottom:8px;">
+      <div style="margin-top:34px;">
+        <div style="background:${C.acc}22;border:1px solid ${C.acc}55;border-radius:8px;padding:10px 14px;text-align:center;min-width:110px;">
+          <div style="font-size:11px;font-weight:800;color:${C.acc};">Data & Analytics</div>
+          <div style="font-size:10px;color:${C.mut};margin-top:2px;">87 members</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;margin-top:46px;"><div style="width:16px;height:2px;background:${C.dim};"></div><span style="color:${C.dim};font-size:16px;">›</span></div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${mentors.map((m,mi)=>`
+          <div style="display:flex;align-items:flex-start;">
+            <div onclick="toggleMentor(${mi})" style="background:${C.pur}22;border:1px solid ${C.pur}55;border-radius:7px;padding:8px 12px;cursor:pointer;min-width:125px;text-align:center;">
+              <div style="font-size:11px;font-weight:700;">${m.n}</div>
+              <div style="font-size:9px;color:${C.pur};margin-top:2px;">${m.r}</div>
+              <div style="font-size:9px;color:${C.mut};margin-top:2px;">${expanded.includes(mi)?'▾':'▸'} ${m.mt.length} mentees</div>
+            </div>
+            ${expanded.includes(mi)?`
+              <div style="display:flex;align-items:center;margin-top:18px;"><div style="width:12px;height:2px;background:${C.dim};"></div><span style="color:${C.dim};font-size:16px;">›</span></div>
+              <div style="display:flex;flex-direction:column;gap:5px;">
+                ${m.mt.map(t=>`<div style="background:${C.grn}15;border:1px solid ${C.grn}33;border-radius:6px;padding:6px 10px;min-width:115px;text-align:center;">
+                  <div style="font-size:10px;font-weight:600;">${t.n}</div>
+                  <div style="font-size:9px;color:${C.grn};margin-top:1px;">${t.r}</div>
+                </div>`).join('')}
+              </div>`:``}
+          </div>`).join('')}
+      </div>
+    </div></div>`;
+}
+
+function toggleMentor(i){
+  expandedMentors=expandedMentors.includes(i)?expandedMentors.filter(x=>x!==i):[...expandedMentors,i];
+  renderDecompTree();
+}
+
+function renderDelivery(){
+  document.getElementById('kpi-delivery').innerHTML=[
+    makeKPI('Total Projects','25','',C.acc),
+    makeKPI('On Track (G)','3','RAG Green',C.grn),
+    makeKPI('At Risk (A)','2','RAG Amber',C.amb),
+    makeKPI('Critical (R)','1','RAG Red',C.red),
+    makeKPI('MTD Utilization','87%','2,180 hrs',C.pur),
+    makeKPI('YTD Utilization','86%','24,860 hrs',C.acc)
+  ].join('');
+
+  document.getElementById('projTable').innerHTML=`
+    <thead><tr><th>Project</th><th>Client</th><th>Type</th><th>PM</th><th>Contract</th><th>Status</th><th>RAG</th><th>MTD</th><th>YTD</th><th>Tier</th></tr></thead>
+    <tbody>${projList.map(p=>{
+      const mtdC=p.mtd>=85?C.grn:p.mtd>=75?C.amb:C.red;
+      const tierC=p.tier==='R1'?C.grn:p.tier==='R2'?C.amb:C.red;
+      return `<tr>
+        <td style="font-weight:600;">${p.n}</td><td style="color:${C.mut};">${p.cl}</td><td style="color:${C.mut};">${p.ty}</td><td style="color:${C.mut};">${p.pm}</td>
+        <td><span style="background:${C.dim};color:${C.mut};border-radius:3px;padding:2px 6px;font-size:10px;">${p.co}</span></td>
+        <td><span style="color:${p.st==='Active'?C.grn:C.red};">● ${p.st}</span></td>
+        <td><span class="rag-${p.rag.toLowerCase()}">${p.rag==='G'?'ON TRACK':p.rag==='A'?'AT RISK':'CRITICAL'}</span></td>
+        <td style="color:${mtdC};font-family:monospace;font-weight:700;">${p.mtd}%</td>
+        <td style="color:${C.mut};font-family:monospace;">${p.ytd}%</td>
+        <td><span style="background:${tierC}22;color:${tierC};border-radius:3px;padding:2px 8px;font-size:10px;font-family:monospace;font-weight:700;">${p.tier}</span></td>
+      </tr>`;}).join('')}</tbody>`;
+
+  document.getElementById('tierCards').innerHTML=`<div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+    ${[{t:'R1 (>$2M)',n:8,c:C.grn},{t:'R2 ($1-2M)',n:11,c:C.amb},{t:'R3 (<$1M)',n:6,c:C.red}].map(r=>`
+      <div style="padding:10px;background:${C.sur};border-radius:6px;text-align:center;border:1px solid ${r.c}44;">
+        <div style="font-size:18px;font-weight:800;color:${r.c};font-family:monospace;">${r.n}</div>
+        <div style="font-size:8px;color:${C.mut};margin-top:2px;">${r.t}</div>
+      </div>`).join('')}</div>`;
+
+  document.getElementById('escalations').innerHTML=`
+    ${escs.map(e=>{const c=e.st==='Open'?C.red:e.st==='In Progress'?C.amb:C.grn;return `
+      <div style="background:${C.sur};border-radius:6px;padding:9px 12px;margin-bottom:7px;border-left:3px solid ${c};">
+        <div style="display:flex;justify-content:space-between;"><span style="font-size:11px;font-weight:700;">${e.p}</span><span style="font-size:9px;color:${C.mut};">${e.dt}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px;"><span style="font-size:10px;color:${C.mut};">${e.ty} · ${e.cl}</span><span style="font-size:9px;color:${c};font-weight:600;">${e.st}</span></div>
+      </div>`;}).join('')}
+    <div style="padding:9px 12px;background:${C.sur};border-radius:6px;display:flex;justify-content:space-between;">
+      <span style="font-size:11px;color:${C.mut};">Avg CSAT</span>
+      <span style="font-size:13px;font-weight:800;color:${C.grn};font-family:monospace;">4.3/5.0</span>
+    </div>`;
+}
+
+function renderTeam(){
+  const search=(document.getElementById('tSearch')||{value:''}).value.toLowerCase();
+  const mgr=(document.getElementById('tMgr')||{value:'All'}).value;
+  const filtered=teamD.filter(m=>(m.n+m.r+m.bu).toLowerCase().includes(search)&&(mgr==='All'||m.mg===mgr));
+
+  document.getElementById('teamCount').textContent=`Showing 1 coworker profile`;
+  document.getElementById('kpi-team').innerHTML=[
+    makeKPI('Business Unit','Data & Analytics','Coworker BU',C.acc),
+    makeKPI('Manager Name','Sarah Chen','Reporting Manager',C.grn),
+    makeKPI('Base Location','Bengaluru','Primary Office',C.amb),
+    makeKPI('Avg Hybrid Comply','86%','',C.pur),
+    makeKPI('Certs Active','18','In progress',C.acc),
+    makeKPI('Mentor/Mentee','Mentor','Role in Mentoring','#FF6B9D')
+  ].join('');
+
+  // Show only one coworker (Kevin Park) - no Manager column
+  const coworker=teamD.find(m=>m.n==='Kevin Park')||teamD[0];
+  const avc=parseInt(coworker.av)<=15?C.grn:parseInt(coworker.av)<=35?C.amb:C.red;
+  const alc=coworker.al==='Full'?C.grn:C.amb;
+  const hyc=parseInt(coworker.hy)>=85?C.grn:C.amb;
+  const initials=coworker.n.split(' ').map(x=>x[0]).join('');
+  document.getElementById('teamTable').innerHTML=`
+    <thead><tr><th>Name</th><th>Role</th><th>Type</th><th>Exp</th><th>Billable</th><th>Avail</th><th>Skills</th><th>BU</th><th>Mentor</th><th>Alloc</th><th>Hybrid</th></tr></thead>
+    <tbody><tr>
+      <td><div style="display:flex;align-items:center;gap:7px;">
+        <div style="width:26px;height:26px;border-radius:50%;background:hsl(188,60%,38%);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0;">${initials}</div>
+        <span style="font-weight:600;">${coworker.n}</span></div></td>
+      <td style="color:${C.mut};">${coworker.r}</td>
+      <td><span style="background:${C.acc}22;color:${C.acc};border-radius:3px;padding:2px 6px;font-size:10px;">${coworker.ty}</span></td>
+      <td style="color:${C.mut};font-family:monospace;">${coworker.e}</td>
+      <td style="color:${C.acc};font-family:monospace;font-weight:700;">${coworker.b}</td>
+      <td style="color:${avc};">${coworker.av}</td>
+      <td>${coworker.sk.map(s=>`<span class="tag">${s}</span>`).join(' ')}</td>
+      <td style="color:${C.mut};">${coworker.bu}</td>
+      <td style="color:${C.mut};">${coworker.me}</td>
+      <td><span style="background:${alc}22;color:${alc};border-radius:3px;padding:2px 6px;font-size:10px;">${coworker.al}</span></td>
+      <td style="color:${hyc};font-family:monospace;">${coworker.hy}</td>
+    </tr></tbody>`;
+
+  // Assets - show only the selected coworker's assets
+  // const coworkerAsset=assets.find(a=>a.n==='Kevin Park')||assets[0];
+  // document.getElementById('assetBars').innerHTML=`
+  //   <div style="font-size:9px;color:${C.mut};margin-bottom:10px;display:flex;gap:14px;">
+  //     <span style="display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:8px;height:8px;background:${C.grn};border-radius:1px;"></span>Live</span>
+  //     <span style="display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:8px;height:8px;background:${C.amb};border-radius:1px;"></span>In Progress</span>
+  //     <span style="display:flex;align-items:center;gap:3px;"><span style="display:inline-block;width:8px;height:8px;background:${C.dim};border-radius:1px;"></span>Deferred</span>
+  //   </div>
+  //   ${(()=>{const a=coworkerAsset;const tot=a.l+a.i+a.b;const lP=Math.round(a.l/tot*100);const iP=Math.round(a.i/tot*100);const bP=100-lP-iP;const init=a.n.split(' ').map(x=>x[0]).join('');return `
+  //     <div style="display:flex;align-items:center;gap:10px;margin-bottom:9px;">
+  //       <div style="display:flex;align-items:center;gap:7px;width:120px;flex-shrink:0;">
+  //         <div style="width:24px;height:24px;border-radius:50%;background:hsl(188,55%,38%);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:#fff;flex-shrink:0;">${init}</div>
+  //         <span style="font-size:10px;font-weight:600;">${a.n.split(' ')[0]}</span>
+  //       </div>
+  //       <div style="flex:1;height:20px;background:${C.sur};border-radius:3px;overflow:hidden;display:flex;">
+  //         ${a.l>0?`<div style="width:${lP}%;background:${C.grn};display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;color:#000;font-weight:700;">${a.l}</span></div>`:''}
+  //         ${a.i>0?`<div style="width:${iP}%;background:${C.amb};display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;color:#000;font-weight:700;">${a.i}</span></div>`:''}
+  //         ${a.b>0?`<div style="width:${bP}%;background:${C.dim};display:flex;align-items:center;justify-content:center;"><span style="font-size:9px;color:${C.mut};font-weight:700;">${a.b}</span></div>`:''}
+  //       </div>
+  //       <div style="display:flex;gap:7px;flex-shrink:0;">
+  //         <span style="font-size:9px;color:${C.grn};font-family:monospace;width:16px;text-align:center;">${a.l}</span>
+  //         <span style="font-size:9px;color:${C.amb};font-family:monospace;width:16px;text-align:center;">${a.i}</span>
+  //         <span style="font-size:9px;color:${C.mut};font-family:monospace;width:16px;text-align:center;">${a.b}</span>
+  //         <span style="font-size:9px;font-weight:700;font-family:monospace;width:20px;text-align:right;">${tot}</span>
+  //       </div>
+  //     </div>`;})()}`;
+
+    const coworkerAsset=assets.find(a=>a.n==='Kevin Park')||assets[0];
+    document.getElementById('assetBars').innerHTML=[{n:"WFH/O Bot",st:"Live",dt:"Oct 14",c:C.grn},{n:"Certification Portal",st:"In Progress",dt:"Dec 20",c:C.amb},{n:"Exit Vault",st:"In Progress",dt:"Jan 15",c:C.amb},{n:"Ace IT",st:"Live",dt:"Sep 30",c:C.grn},{n:"LogBuddy",st:"Deferred",dt:"Feb 28",c:C.amb}].map(c=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 9px;background:${C.sur};border-radius:5px;margin-bottom:7px;">
+      <div><div style="font-size:11px;">${c.n}</div><div style="font-size:9px;color:${C.mut};">${c.dt}</div></div>
+      <span style="color:${c.c};font-size:10px;font-weight:600;align-self:center;">${c.st==='Live'?'✓':'◑'} ${c.st}</span>
+    </div>`).join('');
+
+  // Accolades Visual
+  const accolades=[{n:'A&B Award',dt:'Mar 2024',desc:'Outstanding Delivery',c:C.grn,icon:'🏆'},{n:'Feather on the Cap',dt:'Jul 2024',desc:'Innovation Excellence',c:'#FF6B9D',icon:'🪶'},{n:'A&B Award',dt:'Nov 2023',desc:'Client Satisfaction',c:C.grn,icon:'🏆'}];
+  document.getElementById('accoladesVisual').innerHTML=accolades.map(ac=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:${C.sur};border-radius:6px;margin-bottom:7px;border-left:3px solid ${ac.c};">
+      <span style="font-size:18px;">${ac.icon}</span>
+      <div style="flex:1;"><div style="font-size:11px;font-weight:700;color:${ac.c};">${ac.n}</div><div style="font-size:9px;color:${C.mut};margin-top:2px;">${ac.desc}</div></div>
+      <span style="font-size:9px;color:${C.mut};font-family:monospace;">${ac.dt}</span>
+    </div>`).join('');
+
+  // Project Allocations
+  const projAlloc=[{n:'DataPlatform v3',role:'ML Engineer',alloc:'100%',since:'Jan 2024',rag:'G'},{n:'ML Analytics',role:'AI Contributor',alloc:'20%',since:'Oct 2024',rag:'G'}];
+  document.getElementById('projectAllocations').innerHTML=projAlloc.map(p=>`
+    <div style="padding:9px 11px;background:${C.sur};border-radius:6px;margin-bottom:7px;border-left:3px solid ${p.rag==='G'?C.grn:C.amb};">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:11px;font-weight:700;">${p.n}</span><span class="rag-${p.rag.toLowerCase()}" style="font-size:9px;">${p.rag==='G'?'ACTIVE':'AT RISK'}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;"><span style="font-size:9px;color:${C.mut};">${p.role}</span><span style="font-size:10px;color:${C.acc};font-family:monospace;font-weight:700;">${p.alloc}</span></div>
+      <div style="font-size:9px;color:${C.mut};margin-top:2px;">Since ${p.since}</div>
+    </div>`).join('');
+
+  // Project Forecast Allocation
+  const projForecast=[{n:'AI Transformation',role:'ML Lead',alloc:'80%',start:'Feb 2025',prob:'High'},{n:'Cloud Native Rearch',role:'Contributor',alloc:'40%',start:'Mar 2025',prob:'Medium'}];
+  document.getElementById('projectForecast').innerHTML=`
+    <div style="font-size:9px;color:${C.mut};margin-bottom:8px;letter-spacing:1px;font-family:monospace;">UPCOMING ALLOCATIONS</div>
+    ${projForecast.map(p=>`
+    <div style="padding:9px 11px;background:${C.sur};border-radius:6px;margin-bottom:7px;border-left:3px solid ${C.pur};">
+      <div style="display:flex;justify-content:space-between;"><span style="font-size:11px;font-weight:700;">${p.n}</span><span style="font-size:9px;color:${p.prob==='High'?C.grn:C.amb};font-weight:700;">${p.prob}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;"><span style="font-size:9px;color:${C.mut};">${p.role}</span><span style="font-size:10px;color:${C.pur};font-family:monospace;font-weight:700;">${p.alloc}</span></div>
+      <div style="font-size:9px;color:${C.mut};margin-top:2px;">Starting ${p.start}</div>
+    </div>`).join('')}`;
+
+  // Organizational Activities
+  const orgActsCW=[{a:'CNG',status:'Completed',dt:'Q2 2024',c:C.grn},{a:'Allspark',status:'Active',dt:'Q4 2024',c:C.amb},{a:'Hackathon — AI Track',status:'Completed',dt:'Q3 2024',c:C.grn},{a:'Internal Knowledge Share',status:'Completed',dt:'Q1 2024',c:C.grn}];
+  document.getElementById('orgActivitiesCoworker').innerHTML=orgActsCW.map(a=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 11px;background:${C.sur};border-radius:6px;margin-bottom:7px;border-left:3px solid ${a.c};">
+      <span style="font-size:16px;">${a.status==='Completed'?'':''}</span>
+      <div style="flex:1;"><div style="font-size:11px;font-weight:600;">${a.a}</div><div style="font-size:9px;color:${C.mut};margin-top:1px;">${a.dt}</div></div>
+      <span style="font-size:9px;color:${a.c};font-weight:700;">${a.status}</span>
+    </div>`).join('');
+
+  document.getElementById('certList').innerHTML=[{n:"AWS SAA",st:"Completed",dt:"Oct 14",c:C.grn},{n:"Azure AZ-900",st:"In Progress",dt:"Dec 20",c:C.amb},{n:"Kubernetes CKA",st:"In Progress",dt:"Jan 15",c:C.amb},{n:"PMP Renewal",st:"Completed",dt:"Sep 30",c:C.grn},{n:"CISSP",st:"In Progress",dt:"Feb 28",c:C.amb}].map(c=>`
+    <div style="display:flex;justify-content:space-between;padding:6px 9px;background:${C.sur};border-radius:5px;margin-bottom:7px;">
+      <div><div style="font-size:11px;">${c.n}</div><div style="font-size:9px;color:${C.mut};">${c.dt}</div></div>
+      <span style="color:${c.c};font-size:10px;font-weight:600;align-self:center;">${c.st==='Completed'?'✓':'◑'} ${c.st}</span>
+    </div>`).join('');
+
+  // Q pills
+  const pills=document.getElementById('tQPills');
+  if(pills&&pills.children.length===0){
+    ['All','Q1','Q2','Q3','Q4'].forEach(q=>{
+      const d=document.createElement('div');
+      d.className='pill'+(q===tQ?' active':'');
+      d.textContent=q;
+      d.onclick=()=>{tQ=q;document.querySelectorAll('#tQPills .pill').forEach(p=>p.classList.remove('active'));d.classList.add('active');};
+      pills.appendChild(d);
+    });
+  }
+}
+
+// ── DRAW ALL CANVAS CHARTS ────────────────────────────────────────────────────
+function drawAllCharts(){
+  if(activePage==='overview'){
+    drawLineArea('c-revTrend',revTrend.map(d=>d.q),[{data:revTrend.map(d=>d.r),color:C.acc,fill:true},{data:revTrend.map(d=>d.t),color:C.amb,dash:true}],{min:3});
+    drawDonut('c-gender',[{n:'Male',v:58},{n:'Female',v:38},{n:'Other',v:4}],[C.acc,'#FF6B9D',C.pur]);
+    drawLineArea('c-util',months,[{data:utilData,color:C.grn,fill:true}],{min:60,max:100,pct:true,refLine:80});
+    drawBarChart('c-hiring',months.slice(0,8),[{data:hiring.map(d=>d.h),color:C.grn},{data:hiring.map(d=>d.a),color:C.red},{data:hiring.map(d=>d.b),color:C.amb}],{});
+  }
+  if(activePage==='bu'){
+    drawBarChart('c-buRev',buRevQ.map(d=>d.q),[{data:buRevQ.map(d=>d.p),color:C.dim},{data:buRevQ.map(d=>d.c),color:C.acc}],{});
+    // compliance
+    drawLineArea('c-compliance',compD.map(d=>d.q),[{data:compD.map(d=>d.c),color:C.pur,fill:true}],{min:60,max:100,pct:true});
+    drawBarChart('c-skills',skillsD.map(d=>d.s),[{data:skillsD.map(d=>d.n),color:C.acc}],{});
+    drawDonut('c-onshore',[{n:'Onshore',v:35},{n:'Offshore',v:52}],[C.acc,C.pur]);
+  }
+  if(activePage==='delivery'){
+    drawBarChart('c-billing',billing.map(d=>d.m),[{data:billing.map(d=>d.p),color:C.dim},{data:billing.map(d=>d.a),color:C.acc}],{});
+    drawBarChart('c-sprint',sprints.map(d=>d.s),[{data:sprints.map(d=>d.p),color:C.dim},{data:sprints.map(d=>d.d),color:C.pur}],{});
+    drawBarChart('c-spill',sprints.map(d=>d.s),[{data:sprints.map(d=>d.sp),color:C.red+'88'}],{});
+  }
+}
+
+const compD=[{q:"Q1",c:72},{q:"Q2",c:78},{q:"Q3",c:85},{q:"Q4",c:91}];
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAll();
+setTimeout(drawAllCharts,100);
+window.addEventListener('resize',drawAllCharts);
+</script>
+</body>
+</html>
